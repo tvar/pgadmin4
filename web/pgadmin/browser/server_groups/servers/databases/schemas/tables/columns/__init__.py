@@ -29,6 +29,7 @@ from pgadmin.utils.driver import get_driver
 from config import PG_DEFAULT_DRIVER
 from pgadmin.utils import IS_PY2
 from pgadmin.utils.ajax import ColParamsJSONDecoder
+from pgadmin.utils.compile_template_name import compile_template_path
 
 # If we are in Python3
 if not IS_PY2:
@@ -211,8 +212,7 @@ class ColumnsView(PGChildNodeView, DataTypeReader):
             self.qtTypeIdent = driver.qtTypeIdent
 
             # Set the template path for the SQL scripts
-            self.template_path = 'columns/sql/#{0}#'.format(
-                self.manager.version)
+            self.template_path = compile_template_path('columns/sql', self.manager.server_type, self.manager.version)
 
             # Allowed ACL for column 'Select/Update/Insert/References'
             self.acl = ['a', 'r', 'w', 'x']

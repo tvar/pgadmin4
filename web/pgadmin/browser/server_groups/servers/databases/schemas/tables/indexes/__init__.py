@@ -91,7 +91,8 @@ class IndexesModule(CollectionNodeModule):
             if 'vid' not in kwargs:
                 return True
 
-            template_path = 'indexes/sql/#{0}#'.format(manager.version)
+            template_path = compile_template_path('indexes/sql', manager.server_type, manager.version)
+
             SQL = render_template(
                 "/".join([template_path, 'backend_support.sql']),
                 vid=kwargs['vid']

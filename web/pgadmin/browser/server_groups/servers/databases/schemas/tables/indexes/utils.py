@@ -14,6 +14,7 @@ from flask_babelex import gettext as _
 from pgadmin.utils.ajax import internal_server_error
 from pgadmin.utils.exception import ObjectGone
 from functools import wraps
+from pgadmin.utils.compile_template_name import compile_template_path
 
 
 def get_template_path(f):
@@ -28,7 +29,7 @@ def get_template_path(f):
         conn_obj = args[0]
         if 'template_path' not in kwargs or kwargs['template_path'] is None:
             kwargs['template_path'] = \
-                'indexes/sql/#{0}#'.format(conn_obj.manager.version)
+                compile_template_path('indexes/sql', conn_obj.manager.server_type, conn_obj.manager.version)
 
         return f(*args, **kwargs)
     return wrap
