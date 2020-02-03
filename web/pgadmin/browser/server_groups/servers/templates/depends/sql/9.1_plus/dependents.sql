@@ -1,3 +1,4 @@
+SET LOCAL join_collapse_limit=8;
 SELECT DISTINCT dep.deptype, dep.classid, cl.relkind, ad.adbin, ad.adsrc,
     CASE WHEN cl.relkind IS NOT NULL THEN cl.relkind || COALESCE(dep.objsubid::text, '')
         WHEN tg.oid IS NOT NULL THEN 'T'::text
@@ -38,11 +39,12 @@ LEFT JOIN pg_namespace nsrw ON clrw.relnamespace=nsrw.oid
 LEFT JOIN pg_language la ON dep.objid=la.oid
 LEFT JOIN pg_namespace ns ON dep.objid=ns.oid
 LEFT JOIN pg_attrdef ad ON ad.oid=dep.objid
-LEFT JOIN pg_foreign_server fs ON fs.oid=dep.objid
-LEFT JOIN pg_foreign_data_wrapper fdw ON fdw.oid=dep.objid
 LEFT JOIN pg_type prtyp ON prtyp.oid = pr.prorettype
 LEFT JOIN pg_inherits inhits ON (inhits.inhrelid=dep.objid)
 LEFT JOIN pg_inherits inhed ON (inhed.inhparent=dep.objid)
+LEFT JOIN pg_foreign_server fs ON fs.oid=dep.objid
+LEFT JOIN pg_foreign_data_wrapper fdw ON fdw.oid=dep.objid
+
 {{where_clause}} AND
 classid IN ( SELECT oid FROM pg_class WHERE relname IN
    ('pg_class', 'pg_constraint', 'pg_conversion', 'pg_language', 'pg_proc', 'pg_rewrite', 'pg_namespace',

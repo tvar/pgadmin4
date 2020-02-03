@@ -1,5 +1,6 @@
 SELECT *,
 	(CASE when pre_coll_inherits is NULL then ARRAY[]::varchar[] else pre_coll_inherits END) as coll_inherits
+  {% if tid %}, (CASE WHEN is_partitioned THEN (SELECT substring(pg_get_partition_def({{ tid }}::oid, true) from 14)) ELSE '' END) AS partition_scheme {% endif %}
 FROM (
 	SELECT rel.oid, rel.relname AS name, rel.reltablespace AS spcoid,rel.relacl AS relacl_str,
 		(CASE WHEN length(spc.spcname) > 0 THEN spc.spcname ELSE
@@ -29,6 +30,11 @@ FROM (
 			WHERE i.inhrelid = rel.oid) AS inherited_tables_cnt,
 		false AS relpersistence,
 		substring(array_to_string(rel.reloptions, ',') FROM 'fillfactor=([0-9]*)') AS fillfactor,
+		substring(array_to_string(rel.reloptions, ',') FROM 'compresslevel=([0-9]*)') AS compresslevel,
+		substring(array_to_string(rel.reloptions, ',') FROM 'blocksize=([0-9]*)') AS blocksize,
+		substring(array_to_string(rel.reloptions, ',') FROM 'orientation=(row|column)') AS orientation,
+		substring(array_to_string(rel.reloptions, ',') FROM 'appendonly=(true|false)')::boolean AS appendonly,
+		substring(array_to_string(rel.reloptions, ',') FROM 'compresstype=(zlib|quicklz|rle_type|none)') AS compresstype,
 		(CASE WHEN (substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_enabled=([a-z|0-9]*)') = 'true')
 			THEN true ELSE false END) AS autovacuum_enabled,
 		substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_vacuum_threshold=([0-9]*)') AS autovacuum_vacuum_threshold,
@@ -61,13 +67,18 @@ FROM (
 		(CASE WHEN array_length(tst.reloptions, 1) > 0 AND rel.reltoastrelid != 0 THEN true ELSE false END) AS toast_autovacuum,
 
 		ARRAY[]::varchar[] AS seclabels,
-		(CASE WHEN rel.oid <= {{ datlastsysoid}}::oid THEN true ElSE false END) AS is_sys_table
+		(CASE WHEN rel.oid <= {{ datlastsysoid}}::oid THEN true ElSE false END) AS is_sys_table,
+
+		gdp.distkey::int2[] AS distribution,
+    (CASE WHEN (SELECT count(*) from pg_partition where parrelid = rel.oid) > 0 THEN true ELSE false END) AS is_partitioned
+
 
 	FROM pg_class rel
 		LEFT OUTER JOIN pg_tablespace spc on spc.oid=rel.reltablespace
 		LEFT OUTER JOIN pg_description des ON (des.objoid=rel.oid AND des.objsubid=0 AND des.classoid='pg_class'::regclass)
 		LEFT OUTER JOIN pg_constraint con ON con.conrelid=rel.oid AND con.contype='p'
 		LEFT OUTER JOIN pg_class tst ON tst.oid = rel.reltoastrelid
+		LEFT OUTER JOIN gp_distribution_policy gdp ON gdp.localoid = rel.oid
 		LEFT JOIN pg_type typ ON rel.reltype=typ.oid
 	 WHERE rel.relkind IN ('r','s','t') AND rel.relnamespace = {{ scid }}
 	{% if tid %}  AND rel.oid = {{ tid }}::oid {% endif %}

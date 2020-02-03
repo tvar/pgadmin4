@@ -1,5 +1,5 @@
 SELECT
-      convalidated,
+      true as convalidated,
       ct.oid,
       conname as name,
       condeferrable,
