@@ -32,6 +32,7 @@ Bug fixes
 | `Issue #3812 <https://redmine.postgresql.org/issues/3812>`_ -  Ensure that path file name should not disappear when changing ext from the dropdown in file explorer dialog.
 | `Issue #4410 <https://redmine.postgresql.org/issues/4410>`_ -  Fixed an issue while editing char[] or character varying[] column from View/Edit data throwing an error.
 | `Issue #4511 <https://redmine.postgresql.org/issues/4511>`_ -  Fixed an issue where Grant wizard unable to handle multiple objects when the query string parameter exceeds its limit.
+| `Issue #4601 <https://redmine.postgresql.org/issues/4601>`_ -  Added tab navigation on close buttons for all the panels and create/properties dialog.
 | `Issue #4827 <https://redmine.postgresql.org/issues/4827>`_ -  Fix column resizable issue in the file explorer dialog.
 | `Issue #5000 <https://redmine.postgresql.org/issues/5000>`_ -  Logout the pgAdmin session when no user activity of mouse move, click or keypress.
 | `Issue #5025 <https://redmine.postgresql.org/issues/5025>`_ -  Fix an issue where setting STORAGE_DIR to empty should show all the volumes on Windows in server mode.
@@ -39,5 +40,4 @@ Bug fixes
 | `Issue #5066 <https://redmine.postgresql.org/issues/5066>`_ -  Fix an issue where refreshing a package results in the change in the object completely.
 | `Issue #5074 <https://redmine.postgresql.org/issues/5074>`_ -  Fix an issue where select, insert and update scripts on tables throwing an error.
 | `Issue #5076 <https://redmine.postgresql.org/issues/5076>`_ -  Ensure Postfix starts in the container, now it runs as non-root by default.
-| `Issue #5107 <https://redmine.postgresql.org/issues/5107>`_ -  Set proper focus on tab navigation for file manager dialog.
 | `Issue #5116 <https://redmine.postgresql.org/issues/5116>`_ -  Fixed an issue where Save Password control disappears after clicking on it while creating a server.
