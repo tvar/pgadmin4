@@ -472,7 +472,7 @@ class PGChildNodeView(NodeView):
         """
 
         # Set the sql_path
-        sql_path = 'depends/{0}/#{1}#'.format(
+        sql_path = 'depends/{0}/#{0}#{1}#'.format(
             conn.manager.server_type, conn.manager.version)
 
         if where is None:
@@ -528,7 +528,7 @@ class PGChildNodeView(NodeView):
         Returns: Dictionary of dependents for the selected node.
         """
         # Set the sql_path
-        sql_path = 'depends/{0}/#{1}#'.format(
+        sql_path = 'depends/{0}/#{0}#{1}#'.format(
             conn.manager.server_type, conn.manager.version)
 
         if where is None:

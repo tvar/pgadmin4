@@ -79,6 +79,7 @@ def get_version_mapping_directories(server_type):
     """
     if server_type == 'gpdb':
         return (
+            {'name': "gpdb_6.0_plus", 'number': 90424},
             {'name': "gpdb_5.0_plus", 'number': 80323},
             {'name': "5_plus", 'number': 80323},
             {'name': "default", 'number': 0}

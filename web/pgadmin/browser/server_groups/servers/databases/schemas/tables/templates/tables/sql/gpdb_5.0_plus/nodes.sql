@@ -6,7 +6,7 @@ SELECT rel.oid, rel.relname AS name,
     (SELECT count(1) FROM pg_inherits WHERE inhparent=rel.oid LIMIT 1) as is_inherited
 FROM pg_class rel
     WHERE rel.relkind IN ('r','s','t') AND rel.relnamespace = {{ scid }}::oid
-      AND rel.relname NOT IN (SELECT partitiontablename FROM pg_partitions)
+      AND rel.oid NOT IN (select parchildrelid from pg_partition_rule)
       AND rel.oid NOT IN (SELECT reloid from pg_exttable)
     {% if tid %}
       AND rel.oid = {{tid}}::OID
