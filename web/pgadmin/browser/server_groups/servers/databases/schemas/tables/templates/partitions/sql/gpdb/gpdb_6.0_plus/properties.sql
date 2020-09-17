@@ -87,6 +87,8 @@ FROM pg_class rel
     LEFT JOIN pg_partition_rule cr on cr.parparentrule=pr.oid
     LEFT join pg_partition chp on cr.paroid=chp.oid
 
-WHERE p.parrelid = {{tid}}
-  {% if ptid %}  AND rel.oid = {{ ptid }}::oid {% endif %}
+WHERE 
+  {% if ptid %}  rel.oid = {{ ptid }}::oid
+  {% else %} p.parrelid = {{tid}} 
+  {% endif %}
 ORDER BY rel.relname;
