@@ -18,7 +18,7 @@ FROM
         CASE
             WHEN description IS NOT NULL THEN
                 E'\n\nCOMMENT ON TEXT SEARCH PARSER ' || quote_ident(nspname) || E'.' || quote_ident(prs.prsname) ||
-                E' IS ' || pg_catalog.quote_literal(description) || E';'
+                E' IS ' || /*pg_catalog.*/quote_literal(description) || E';'
             ELSE ''  END as sql
     FROM
         pg_ts_parser prs

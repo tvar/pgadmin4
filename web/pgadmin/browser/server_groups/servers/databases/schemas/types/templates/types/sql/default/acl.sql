@@ -21,7 +21,7 @@ FROM
             AS is_grantable, (d).privilege_type AS privilege_type FROM (SELECT
             aclexplode(t.typacl) as d FROM pg_type t WHERE t.oid = {{tid}}::oid) a ORDER BY privilege_type) d
         ) d
-    LEFT JOIN pg_catalog.pg_roles g ON (d.grantor = g.oid)
-    LEFT JOIN pg_catalog.pg_roles gt ON (d.grantee = gt.oid)
+    LEFT JOIN /*pg_catalog.*/pg_roles g ON (d.grantor = g.oid)
+    LEFT JOIN /*pg_catalog.*/pg_roles gt ON (d.grantee = gt.oid)
 GROUP BY g.rolname, gt.rolname
 ORDER BY grantee

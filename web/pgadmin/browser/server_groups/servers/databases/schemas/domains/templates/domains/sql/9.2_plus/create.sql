@@ -1,7 +1,7 @@
 {% import 'macros/schemas/security.macros' as SECLABEL %}
 {% if data %}
 CREATE DOMAIN {{ conn|qtIdent(data.basensp, data.name) }}
-    AS {{ conn|qtTypeIdent(data.basetype) }}{% if data.typlen %}({{data.typlen}}{% if data.precision %},{{data.precision}}{% endif %}){% endif %}{% if data.collname and data.collname != "pg_catalog.\"default\"" %}
+    AS {{ conn|qtTypeIdent(data.basetype) }}{% if data.typlen %}({{data.typlen}}{% if data.precision %},{{data.precision}}{% endif %}){% endif %}{% if data.collname and data.collname != "/*pg_catalog.*/\"default\"" %}
 
     COLLATE {{ data.collname }}{% endif %}{% if data.typdefault %}
 

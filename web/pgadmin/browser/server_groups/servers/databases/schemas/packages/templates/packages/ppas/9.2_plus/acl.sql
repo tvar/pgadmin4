@@ -30,7 +30,7 @@ FROM
         AND oid = {{pkgid}}::oid
   AND nspobjecttype = 0) a ORDER BY privilege_type) d
     ) d
-  LEFT JOIN pg_catalog.pg_roles g ON (d.grantor = g.oid)
-  LEFT JOIN pg_catalog.pg_roles gt ON (d.grantee = gt.oid)
+  LEFT JOIN /*pg_catalog.*/pg_roles g ON (d.grantor = g.oid)
+  LEFT JOIN /*pg_catalog.*/pg_roles gt ON (d.grantee = gt.oid)
 GROUP BY g.rolname, gt.rolname
 ORDER BY grantee

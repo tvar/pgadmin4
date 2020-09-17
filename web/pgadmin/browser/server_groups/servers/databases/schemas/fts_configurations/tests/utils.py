@@ -41,7 +41,7 @@ def create_fts_configuration(server, db_name, schema_name, fts_conf_name):
         connection.commit()
 
         # Get 'oid' from newly created configuration
-        pg_cursor.execute("select oid from pg_catalog.pg_ts_config where "
+        pg_cursor.execute("select oid from /*pg_catalog.*/pg_ts_config where "
                           "cfgname = '%s' order by oid ASC limit 1"
                           % fts_conf_name)
 
@@ -78,7 +78,7 @@ def verify_fts_configuration(server, db_name, fts_conf_name):
         pg_cursor = connection.cursor()
 
         pg_cursor.execute(
-            "select oid from pg_catalog.pg_ts_config where "
+            "select oid from /*pg_catalog.*/pg_ts_config where "
             "cfgname = '%s' order by oid ASC limit 1"
             % fts_conf_name)
         fts_conf = pg_cursor.fetchone()

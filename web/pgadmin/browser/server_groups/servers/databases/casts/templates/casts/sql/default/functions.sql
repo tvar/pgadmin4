@@ -1,6 +1,6 @@
 {# FETCH FUNCTIONS depending upon SOURCE TYPE and TARGET TYPE IN CAST  #}
 SELECT
-    proname || '(' || pg_catalog.pg_get_function_identity_arguments(p.oid) || ')' as proname,
+    proname || '(' || /*pg_catalog.*/pg_get_function_identity_arguments(p.oid) || ')' as proname,
     nspname,
     proargtypes
 FROM

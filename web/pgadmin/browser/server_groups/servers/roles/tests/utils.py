@@ -39,7 +39,7 @@ def verify_role(server, role_name):
                                              server['sslmode'])
         pg_cursor = connection.cursor()
         pg_cursor.execute(
-            "SELECT * from pg_catalog.pg_roles pr WHERE pr.rolname='%s'" %
+            "SELECT * from /*pg_catalog.*/pg_roles pr WHERE pr.rolname='%s'" %
             role_name)
         connection.commit()
         role = pg_cursor.fetchone()
@@ -106,7 +106,7 @@ def create_role(server, role_name):
         connection.commit()
         # Get 'oid' from newly created tablespace
         pg_cursor.execute(
-            "SELECT pr.oid from pg_catalog.pg_roles pr WHERE pr.rolname='%s'" %
+            "SELECT pr.oid from /*pg_catalog.*/pg_roles pr WHERE pr.rolname='%s'" %
             role_name)
         oid = pg_cursor.fetchone()
         role_id = ''
@@ -137,7 +137,7 @@ def delete_role(connection, role_names):
         for role_name in role_names:
             pg_cursor = connection.cursor()
             pg_cursor.execute(
-                "SELECT * FROM pg_catalog.pg_roles WHERE rolname='%s'" %
+                "SELECT * FROM /*pg_catalog.*/pg_roles WHERE rolname='%s'" %
                 role_name)
             role_count = pg_cursor.fetchone()
             if role_count:

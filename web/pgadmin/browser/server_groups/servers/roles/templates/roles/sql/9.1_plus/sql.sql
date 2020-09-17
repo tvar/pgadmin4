@@ -18,7 +18,7 @@ FROM
 		CASE WHEN rolconnlimit > 0 THEN E'\n  CONNECTION LIMIT ' || rolconnlimit ELSE '' END ||
 		CASE WHEN rolvaliduntil IS NOT NULL THEN E'\n  VALID UNTIL ' || quote_literal(rolvaliduntil::text) ELSE '' END || ';' ||
 		-- PostgreSQL < 9.5
-		CASE WHEN rolsuper AND NOT rolcatupdate THEN E'\n\nUPDATE pg_authid SET rolcatupdate=false WHERE rolname=' || pg_catalog.quote_literal(rolname) || ';' ELSE '' END AS sql
+		CASE WHEN rolsuper AND NOT rolcatupdate THEN E'\n\nUPDATE pg_authid SET rolcatupdate=false WHERE rolname=' || /*pg_catalog.*/quote_literal(rolname) || ';' ELSE '' END AS sql
 FROM
 	pg_roles r
 WHERE
@@ -28,7 +28,7 @@ UNION ALL
 	array_to_string(array_agg(sql), E'\n')
 FROM
 (SELECT
-	'GRANT ' || array_to_string(array_agg(rolname), ', ') || ' TO ' || pg_catalog.quote_ident(pg_get_userbyid(%(rid)s::OID)) ||
+	'GRANT ' || array_to_string(array_agg(rolname), ', ') || ' TO ' || /*pg_catalog.*/quote_ident(pg_get_userbyid(%(rid)s::OID)) ||
 	CASE WHEN admin_option THEN ' WITH ADMIN OPTION;' ELSE ';' END AS sql
 FROM
 	(SELECT
@@ -55,7 +55,7 @@ FROM
 	(SELECT
 			unnest(rolconfig) AS rolconfig, rolcanlogin, rolname
 	FROM
-		pg_catalog.pg_roles
+		/*pg_catalog.*/pg_roles
 	WHERE
 		oid=%(rid)s::OID
 	) r
@@ -66,8 +66,8 @@ UNION ALL
 	array_to_string(array_agg(sql), E'\n') AS sql
 FROM
 	(SELECT
-		'ALTER ROLE ' || pg_catalog.quote_ident(pg_get_userbyid(%(rid)s::OID)) ||
-		' IN DATABASE ' || pg_catalog.quote_ident(datname) ||
+		'ALTER ROLE ' || /*pg_catalog.*/quote_ident(pg_get_userbyid(%(rid)s::OID)) ||
+		' IN DATABASE ' || /*pg_catalog.*/quote_ident(datname) ||
 		' SET ' || param|| ' TO ' ||
 		CASE
 		WHEN param IN ('search_path', 'temp_tablespaces') THEN value
@@ -82,19 +82,19 @@ FROM
 			FROM
 				(SELECT *
 				FROM
-					pg_catalog.pg_db_role_setting dr
+					/*pg_catalog.*/pg_db_role_setting dr
 				WHERE
 					dr.setrole=%(rid)s::OID AND dr.setdatabase!=0) c
-				LEFT JOIN pg_catalog.pg_database d ON (d.oid = c.setdatabase)
+				LEFT JOIN /*pg_catalog.*/pg_database d ON (d.oid = c.setdatabase)
 			) a
 		) b
 	) d
 )
 UNION ALL
 (SELECT
-	'COMMENT ON ROLE ' || pg_catalog.quote_ident(pg_get_userbyid(%(rid)s::OID)) || ' IS ' ||  pg_catalog.quote_literal(description) || ';' AS sql
+	'COMMENT ON ROLE ' || /*pg_catalog.*/quote_ident(pg_get_userbyid(%(rid)s::OID)) || ' IS ' ||  /*pg_catalog.*/quote_literal(description) || ';' AS sql
 FROM
-	(SELECT	pg_catalog.shobj_description(%(rid)s::OID, 'pg_authid') AS description) a
+	(SELECT	/*pg_catalog.*/shobj_description(%(rid)s::OID, 'pg_authid') AS description) a
 WHERE
 	description IS NOT NULL)
 -- PostgreSQL >= 9.2
@@ -104,8 +104,8 @@ UNION ALL
 FROM
 	(SELECT
 		'SECURITY LABEL FOR ' || provider ||
-		E'\n  ON ROLE ' || pg_catalog.quote_ident(rolname) ||
-		E'\n  IS ' || pg_catalog.quote_literal(label) || ';' AS sql
+		E'\n  ON ROLE ' || /*pg_catalog.*/quote_ident(rolname) ||
+		E'\n  IS ' || /*pg_catalog.*/quote_literal(label) || ';' AS sql
 	FROM
 		(SELECT
 			label, provider, rolname
@@ -114,5 +114,5 @@ FROM
 			FROM
 				pg_shseclabel sl1
 			WHERE sl1.objoid=%(rid)s::OID) s
-			LEFT JOIN pg_catalog.pg_roles r ON (s.objoid=r.oid)) a) b
+			LEFT JOIN /*pg_catalog.*/pg_roles r ON (s.objoid=r.oid)) a) b
 )) AS a

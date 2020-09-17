@@ -61,12 +61,12 @@ CREATE TABLE public.defaults_{0}
     {1} serial NOT NULL,
     number_defaults numeric(100) DEFAULT 1,
     number_null numeric(100),
-    text_defaults text COLLATE pg_catalog."default"
+    text_defaults text COLLATE /*pg_catalog.*/"default"
         DEFAULT 'Hello World'::text,
-    text_null1 text COLLATE pg_catalog."default",
-    text_null2 text COLLATE pg_catalog."default",
-    text_null3 text COLLATE pg_catalog."default",
-    text_null4 text COLLATE pg_catalog."default",
+    text_null1 text COLLATE /*pg_catalog.*/"default",
+    text_null2 text COLLATE /*pg_catalog.*/"default",
+    text_null3 text COLLATE /*pg_catalog.*/"default",
+    text_null4 text COLLATE /*pg_catalog.*/"default",
     json_defaults json DEFAULT '[51, 52]'::json,
     json_null json,
     boolean_true boolean DEFAULT true,

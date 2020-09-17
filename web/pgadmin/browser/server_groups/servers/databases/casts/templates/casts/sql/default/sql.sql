@@ -11,7 +11,7 @@ FROM
     E' AS ' || format_type(tt.oid,tt.typtypmod) || E')\n' ||
     CASE WHEN ca.castfunc != 0 THEN
     E'\tWITH FUNCTION ' ||
-    pr.proname || '(' || COALESCE(pg_catalog.pg_get_function_identity_arguments(pr.oid), '') || E')'
+    pr.proname || '(' || COALESCE(/*pg_catalog.*/pg_get_function_identity_arguments(pr.oid), '') || E')'
     WHEN ca.castfunc = 0 AND ca.castmethod = 'i' THEN
     E'\tWITH INOUT'
     ELSE E'\tWITHOUT FUNCTION' END ||
@@ -21,7 +21,7 @@ FROM
     CASE WHEN a.description IS NOT NULL THEN
         E'\n\nCOMMENT ON CAST (' || (format_type(st.oid,NULL)) ||
         E' AS ' || (format_type(tt.oid,tt.typtypmod)) ||
-        E') IS ' || pg_catalog.quote_literal(description) || E';'
+        E') IS ' || /*pg_catalog.*/quote_literal(description) || E';'
     ELSE ''  END as sql
 FROM
     pg_cast ca

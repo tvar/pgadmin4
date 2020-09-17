@@ -77,7 +77,7 @@ class TestSQLASCIIEncoding(BaseTestGenerator):
             self.server,
             self.encode_db_name,
             """CREATE TABLE {0}(
-                name character varying(200) COLLATE pg_catalog."default")
+                name character varying(200) COLLATE /*pg_catalog.*/"default")
             """.format(self.table_name))
 
     def runTest(self):

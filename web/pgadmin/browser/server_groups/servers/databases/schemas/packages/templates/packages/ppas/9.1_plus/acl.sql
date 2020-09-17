@@ -28,6 +28,6 @@ FROM
         WHERE nspparent = {{scid}}::oid
         AND oid = {{pkgid}}::oid) a ORDER BY privilege_type) d
     ) d
-  LEFT JOIN pg_catalog.pg_roles g ON (d.grantor = g.oid)
-  LEFT JOIN pg_catalog.pg_roles gt ON (d.grantee = gt.oid)
+  LEFT JOIN /*pg_catalog.*/pg_roles g ON (d.grantor = g.oid)
+  LEFT JOIN /*pg_catalog.*/pg_roles gt ON (d.grantee = gt.oid)
 GROUP BY g.rolname, gt.rolname

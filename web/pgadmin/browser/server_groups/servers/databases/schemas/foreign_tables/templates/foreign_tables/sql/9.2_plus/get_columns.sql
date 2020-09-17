@@ -4,7 +4,7 @@ SELECT
     CASE WHEN length(cn.nspname::text) > 0 AND length(cl.collname::text) > 0 THEN
     concat(cn.nspname, '."', cl.collname,'"') ELSE '' END AS collname,
     (SELECT COUNT(1) from pg_type t2 WHERE t2.typname=t.typname) > 1 AS isdup,
-    pg_catalog.pg_get_expr(def.adbin, def.adrelid) AS typdefault
+    /*pg_catalog.*/pg_get_expr(def.adbin, def.adrelid) AS typdefault
 FROM
     pg_attribute att
 JOIN

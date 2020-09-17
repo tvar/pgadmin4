@@ -40,7 +40,7 @@ def create_fts_dictionary(server, db_name, schema_name, fts_dict_name):
         connection.commit()
 
         # Get 'oid' from newly created dictionary
-        pg_cursor.execute("select oid from pg_catalog.pg_ts_dict where "
+        pg_cursor.execute("select oid from /*pg_catalog.*/pg_ts_dict where "
                           "dictname = '%s' order by oid ASC limit 1"
                           % fts_dict_name)
 
@@ -77,7 +77,7 @@ def verify_fts_dict(server, db_name, fts_dict_name):
         pg_cursor = connection.cursor()
 
         pg_cursor.execute(
-            "select oid from pg_catalog.pg_ts_dict where "
+            "select oid from /*pg_catalog.*/pg_ts_dict where "
             "dictname = '%s' order by oid ASC limit 1"
             % fts_dict_name)
         fts_dict = pg_cursor.fetchone()

@@ -26,9 +26,9 @@ FROM
         END AS privilege_type,
         defaclobjtype as deftype
     FROM
-        (SELECT defaclobjtype, aclexplode(defaclacl) as acl FROM pg_catalog.pg_default_acl dacl
+        (SELECT defaclobjtype, aclexplode(defaclacl) as acl FROM /*pg_catalog.*/pg_default_acl dacl
       WHERE dacl.defaclnamespace = 0::OID) d) a
-    LEFT JOIN pg_catalog.pg_roles g ON (a.grantor = g.oid)
-    LEFT JOIN pg_catalog.pg_roles gt ON (a.grantee = gt.oid)
+    LEFT JOIN /*pg_catalog.*/pg_roles g ON (a.grantor = g.oid)
+    LEFT JOIN /*pg_catalog.*/pg_roles gt ON (a.grantee = gt.oid)
 GROUP BY g.rolname, gt.rolname, a.deftype
 ORDER BY a.deftype

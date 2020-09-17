@@ -1,6 +1,6 @@
 {% if fetch_database %}
 SELECT datname,
-    datallowconn AND pg_catalog.has_database_privilege(datname, 'CONNECT') AS datallowconn,
+    datallowconn AND /*pg_catalog.*/has_database_privilege(datname, 'CONNECT') AS datallowconn,
     dattablespace
 FROM pg_database db
 ORDER BY datname

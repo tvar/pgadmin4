@@ -5,7 +5,7 @@ SELECT
     pr.pronargs, pr.prorettype, pr.proallargtypes, pr.proargmodes, pr.probin, pr.proacl,
     pr.proname, pr.proname AS name, pg_get_function_result(pr.oid) AS prorettypename,
     typns.nspname AS typnsp, lanname, proargnames, oidvectortypes(proargtypes) AS proargtypenames,
-    pg_get_expr(proargdefaults, 'pg_catalog.pg_class'::regclass) AS proargdefaultvals,
+    pg_get_expr(proargdefaults, 'pg_class'::regclass) AS proargdefaultvals,
     pronargdefaults, proconfig, pg_get_userbyid(proowner) AS funcowner, description,
     (SELECT
         array_agg(provider || '=' || label)

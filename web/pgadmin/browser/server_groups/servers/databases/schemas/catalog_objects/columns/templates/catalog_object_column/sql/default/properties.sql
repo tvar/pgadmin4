@@ -1,5 +1,5 @@
 SELECT
-    att.*, def.*, pg_catalog.pg_get_expr(def.adbin, def.adrelid) AS defval,
+    att.*, def.*, /*pg_catalog.*/pg_get_expr(def.adbin, def.adrelid) AS defval,
         CASE WHEN att.attndims > 0 THEN 1 ELSE 0 END AS isarray,
         format_type(ty.oid,NULL) AS typname,
         format_type(ty.oid,att.atttypmod) AS displaytypname,

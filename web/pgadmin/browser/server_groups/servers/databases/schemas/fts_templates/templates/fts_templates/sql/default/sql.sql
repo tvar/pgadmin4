@@ -14,7 +14,7 @@ FROM
         CASE
             WHEN a.description IS NOT NULL THEN
                 E'\n\nCOMMENT ON TEXT SEARCH TEMPLATE ' || quote_ident(nspname) || E'.' || quote_ident(tmpl.tmplname) ||
-                E' IS ' || pg_catalog.quote_literal(description) || E';'
+                E' IS ' || /*pg_catalog.*/quote_literal(description) || E';'
             ELSE ''  END as sql
 FROM
     pg_ts_template tmpl

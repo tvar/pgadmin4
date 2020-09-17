@@ -24,7 +24,7 @@
     END AS castcontext,
     CASE
         WHEN proname IS NULL THEN 'binary compatible'
-        ELSE proname || '(' || pg_catalog.pg_get_function_identity_arguments(pr.oid) || ')'
+        ELSE proname || '(' || /*pg_catalog.*/pg_get_function_identity_arguments(pr.oid) || ')'
     END AS proname,
         ca.castfunc,
         format_type(st.oid,NULL) AS srctyp,

@@ -44,7 +44,7 @@ def create_fts_template(server, db_name, schema_name, fts_temp_name):
         connection.commit()
 
         # Get 'oid' from newly created template
-        pg_cursor.execute("select oid from pg_catalog.pg_ts_template where "
+        pg_cursor.execute("select oid from /*pg_catalog.*/pg_ts_template where "
                           "tmplname = '%s' order by oid ASC limit 1" %
                           fts_temp_name)
 
@@ -81,7 +81,7 @@ def verify_fts_template(server, db_name, fts_temp_name):
         pg_cursor = connection.cursor()
 
         pg_cursor.execute(
-            "select oid from pg_catalog.pg_ts_template where "
+            "select oid from /*pg_catalog.*/pg_ts_template where "
             "tmplname = '%s' order by oid ASC limit 1" % fts_temp_name)
         fts_template = pg_cursor.fetchone()
         connection.close()

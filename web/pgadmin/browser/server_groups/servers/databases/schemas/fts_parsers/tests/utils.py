@@ -46,7 +46,7 @@ def create_fts_parser(server, db_name, schema_name, fts_parser_name):
         connection.commit()
 
         # Get 'oid' from newly created parser
-        pg_cursor.execute("select oid from pg_catalog.pg_ts_parser where "
+        pg_cursor.execute("select oid from /*pg_catalog.*/pg_ts_parser where "
                           "prsname = '%s' order by oid ASC limit 1"
                           % fts_parser_name)
 
@@ -83,7 +83,7 @@ def verify_fts_parser(server, db_name, fts_parser_name):
         pg_cursor = connection.cursor()
 
         pg_cursor.execute(
-            "select oid from pg_catalog.pg_ts_parser where "
+            "select oid from /*pg_catalog.*/pg_ts_parser where "
             "prsname = '%s' order by oid ASC limit 1"
             % fts_parser_name)
         fts_parser = pg_cursor.fetchone()

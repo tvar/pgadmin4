@@ -5,7 +5,7 @@ SELECT
     SELECT
         t.alias
     FROM
-        pg_catalog.ts_token_type(cfgparser) AS t
+        /*pg_catalog.*/ts_token_type(cfgparser) AS t
     WHERE
         t.tokid = maptokentype
     ) AS token,

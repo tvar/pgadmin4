@@ -1,5 +1,5 @@
 SELECT
-    pr.oid, pr.proname || '(' || COALESCE(pg_catalog.pg_get_function_identity_arguments(pr.oid), '') || ')' as name,
+    pr.oid, pr.proname || '(' || COALESCE(/*pg_catalog.*/pg_get_function_identity_arguments(pr.oid), '') || ')' as name,
     lanname, pg_get_userbyid(proowner) as funcowner, description
 FROM
     pg_proc pr

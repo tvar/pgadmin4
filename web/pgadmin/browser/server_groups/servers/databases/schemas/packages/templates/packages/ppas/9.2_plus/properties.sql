@@ -1,6 +1,6 @@
 SELECT nsp.oid, nsp.xmin, nspname AS name,
-    pg_catalog.edb_get_packagebodydef(nsp.oid) AS pkgbodysrc,
-    pg_catalog.edb_get_packageheaddef(nsp.oid) AS pkgheadsrc,
+    /*pg_catalog.*/edb_get_packagebodydef(nsp.oid) AS pkgbodysrc,
+    /*pg_catalog.*/edb_get_packageheaddef(nsp.oid) AS pkgheadsrc,
     pg_get_userbyid(nspowner) AS owner,
     array_to_string(nsp.nspacl::text[], ', ') as acl,
     description,

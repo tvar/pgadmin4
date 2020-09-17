@@ -1,6 +1,6 @@
 SELECT att.attname as name, att.atttypid, att.attlen, att.attnum, att.attndims,
 		att.atttypmod, att.attacl, att.attnotnull, att.attoptions, att.attstattarget,
-		att.attstorage, pg_catalog.pg_get_expr(def.adbin, def.adrelid) AS defval,
+		att.attstorage, pg_get_expr(def.adbin, def.adrelid) AS defval,
 		format_type(ty.oid,NULL) AS typname,
         format_type(ty.oid,att.atttypmod) AS displaytypname,
 		format_type(ty.oid,att.atttypmod) AS cltype,

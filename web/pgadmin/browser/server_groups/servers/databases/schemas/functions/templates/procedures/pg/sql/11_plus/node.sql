@@ -1,9 +1,9 @@
 SELECT
     pr.oid,
     CASE WHEN
-        pg_catalog.pg_get_function_identity_arguments(pr.oid) <> ''
+        /*pg_catalog.*/pg_get_function_identity_arguments(pr.oid) <> ''
     THEN
-        pr.proname || '(' || pg_catalog.pg_get_function_identity_arguments(pr.oid) || ')'
+        pr.proname || '(' || /*pg_catalog.*/pg_get_function_identity_arguments(pr.oid) || ')'
     ELSE
         pr.proname::text
     END AS name,

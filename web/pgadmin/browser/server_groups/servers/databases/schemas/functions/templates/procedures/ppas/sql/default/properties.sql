@@ -5,10 +5,10 @@ SELECT
     pr.pronargs, pr.prorettype, pr.proallargtypes, pr.proargmodes, pr.probin, pr.proacl,
     pr.proname, pr.proname AS name, pg_get_function_result(pr.oid) AS prorettypename,
     typns.nspname AS typnsp, lanname, proargnames, oidvectortypes(proargtypes) AS proargtypenames,
-    pg_get_expr(proargdefaults, 'pg_catalog.pg_class'::regclass) AS proargdefaultvals,
+    pg_get_expr(proargdefaults, 'pg_class'::regclass) AS proargdefaultvals,
     pr.pronargdefaults, proconfig, pg_get_userbyid(proowner) AS funcowner, description,
     (
-        WITH name_with_args_tab AS (SELECT pg_catalog.pg_get_function_identity_arguments(pr.oid) AS val)
+        WITH name_with_args_tab AS (SELECT pg_get_function_identity_arguments(pr.oid) AS val)
         SELECT CASE WHEN
             val <> ''
         THEN

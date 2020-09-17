@@ -6,10 +6,10 @@ SELECT  nsp.nspname schema_name,
         att.atttypid::regtype::text type_name,
         att.atthasdef AS has_default,
         pg_get_expr(def.adbin, def.adrelid) as default
-FROM    pg_catalog.pg_attribute att
-        INNER JOIN pg_catalog.pg_class cls
+FROM    /*pg_catalog.*/pg_attribute att
+        INNER JOIN /*pg_catalog.*/pg_class cls
             ON att.attrelid = cls.oid
-        INNER JOIN pg_catalog.pg_namespace nsp
+        INNER JOIN /*pg_catalog.*/pg_namespace nsp
             ON cls.relnamespace = nsp.oid
         LEFT OUTER JOIN pg_attrdef def
             ON def.adrelid = att.attrelid
@@ -27,10 +27,10 @@ SELECT  nsp.nspname schema_name,
         att.atttypid::regtype::text type_name,
         att.atthasdef AS has_default,
         pg_get_expr(def.adbin, def.adrelid) as default
-FROM    pg_catalog.pg_attribute att
-        INNER JOIN pg_catalog.pg_class cls
+FROM    /*pg_catalog.*/pg_attribute att
+        INNER JOIN /*pg_catalog.*/pg_class cls
             ON att.attrelid = cls.oid
-        INNER JOIN pg_catalog.pg_namespace nsp
+        INNER JOIN /*pg_catalog.*/pg_namespace nsp
             ON cls.relnamespace = nsp.oid
         LEFT OUTER JOIN pg_attrdef def
             ON def.adrelid = att.attrelid

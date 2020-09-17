@@ -1,6 +1,6 @@
 {% if fetch_database %}
 SELECT 'd' as type, datname,
-    datallowconn AND pg_catalog.has_database_privilege(datname, 'CONNECT') AS datallowconn,
+    datallowconn AND /*pg_catalog.*/has_database_privilege(datname, 'CONNECT') AS datallowconn,
     datdba, datlastsysoid
 FROM pg_database db
 UNION

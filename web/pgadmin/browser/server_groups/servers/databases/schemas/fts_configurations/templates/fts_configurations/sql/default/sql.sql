@@ -17,7 +17,7 @@ FROM
             WHEN description IS NOT NULL THEN
                 E'\n\nCOMMENT ON TEXT SEARCH CONFIGURATION ' ||
                 quote_ident(nspname) || E'.' || quote_ident(cfg.cfgname) ||
-                E' IS ' || pg_catalog.quote_literal(description) || E';'
+                E' IS ' || /*pg_catalog.*/quote_literal(description) || E';'
             ELSE ''
         END || E'\n' ||
 
@@ -39,7 +39,7 @@ FROM
                               tokid,
                               alias
                           FROM
-                              pg_catalog.ts_token_type(cfg.cfgparser)
+                              /*pg_catalog.*/ts_token_type(cfg.cfgparser)
                           ) t ON (t.tokid = map.maptokentype)
                 LEFT OUTER JOIN pg_ts_dict dict ON (map.mapdict = dict.oid)
                 LEFT OUTER JOIN pg_namespace pg_ns ON (pg_ns.oid = dict.dictnamespace)
