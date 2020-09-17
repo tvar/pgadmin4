@@ -365,8 +365,8 @@ class FunctionView(PGChildNodeView, DataTypeReader, SchemaDiffObjectCompare):
                 template_initial,
                 self.manager.server_type,
                 'sql',
-                '#{0}#'
-            ]).format(self.manager.version)
+                '#{0}#{1}#',
+            ]).format(self.manager.server_type, self.manager.version)
 
             return f(*args, **kwargs)
 

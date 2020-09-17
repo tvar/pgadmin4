@@ -1,8 +1,9 @@
 SELECT *,
 	(CASE when pre_coll_inherits is NULL then ARRAY[]::varchar[] else pre_coll_inherits END) as coll_inherits
+  {% if tid %}, (CASE WHEN is_partitioned THEN (SELECT substring(pg_get_partition_def({{ tid }}::oid, true) from 14)) ELSE '' END) AS partition_scheme {% endif %}
 FROM (
 	SELECT rel.oid, rel.relname AS name, rel.reltablespace AS spcoid,rel.relacl AS relacl_str,
-		(CASE WHEN length(spc.spcname::text) > 0 THEN spc.spcname ELSE
+		(CASE WHEN length(spc.spcname) > 0 THEN spc.spcname ELSE
 			(SELECT sp.spcname FROM pg_database dtb
 			JOIN pg_tablespace sp ON dtb.dattablespace=sp.oid
 			WHERE dtb.oid = {{ did }}::oid)
@@ -29,7 +30,13 @@ FROM (
 			WHERE i.inhrelid = rel.oid) AS inherited_tables_cnt,
 		false AS relpersistence,
 		substring(array_to_string(rel.reloptions, ',') FROM 'fillfactor=([0-9]*)') AS fillfactor,
-		(substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_enabled=([a-z|0-9]*)'))::BOOL AS autovacuum_enabled,
+		substring(array_to_string(rel.reloptions, ',') FROM 'compresslevel=([0-9]*)') AS compresslevel,
+		substring(array_to_string(rel.reloptions, ',') FROM 'blocksize=([0-9]*)') AS blocksize,
+		substring(array_to_string(rel.reloptions, ',') FROM 'orientation=(row|column)') AS orientation,
+		substring(array_to_string(rel.reloptions, ',') FROM 'appendonly=(true|false)')::boolean AS appendonly,
+		substring(array_to_string(rel.reloptions, ',') FROM 'compresstype=(zlib|quicklz|rle_type|none)') AS compresstype,
+		(CASE WHEN (substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_enabled=([a-z|0-9]*)') = 'true')
+			THEN true ELSE false END) AS autovacuum_enabled,
 		substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_vacuum_threshold=([0-9]*)') AS autovacuum_vacuum_threshold,
 		substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_vacuum_scale_factor=([0-9]*[.]?[0-9]*)') AS autovacuum_vacuum_scale_factor,
 		substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_analyze_threshold=([0-9]*)') AS autovacuum_analyze_threshold,
@@ -39,7 +46,8 @@ FROM (
 		substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_freeze_min_age=([0-9]*)') AS autovacuum_freeze_min_age,
 		substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_freeze_max_age=([0-9]*)') AS autovacuum_freeze_max_age,
 		substring(array_to_string(rel.reloptions, ',') FROM 'autovacuum_freeze_table_age=([0-9]*)') AS autovacuum_freeze_table_age,
-		(substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_enabled=([a-z|0-9]*)'))::BOOL AS toast_autovacuum_enabled,
+		(CASE WHEN (substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_enabled=([a-z|0-9]*)') =  'true')
+			THEN true ELSE false END) AS toast_autovacuum_enabled,
 		substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_vacuum_threshold=([0-9]*)') AS toast_autovacuum_vacuum_threshold,
 		substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_vacuum_scale_factor=([0-9]*[.]?[0-9]*)') AS toast_autovacuum_vacuum_scale_factor,
 		substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_analyze_threshold=([0-9]*)') AS toast_autovacuum_analyze_threshold,
@@ -49,17 +57,29 @@ FROM (
 		substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_freeze_min_age=([0-9]*)') AS toast_autovacuum_freeze_min_age,
 		substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_freeze_max_age=([0-9]*)') AS toast_autovacuum_freeze_max_age,
 		substring(array_to_string(tst.reloptions, ',') FROM 'autovacuum_freeze_table_age=([0-9]*)') AS toast_autovacuum_freeze_table_age,
+		array_to_string(rel.reloptions, ',') AS table_vacuum_settings_str,
+		array_to_string(tst.reloptions, ',') AS toast_table_vacuum_settings_str,
 		rel.reloptions AS reloptions, tst.reloptions AS toast_reloptions, NULL AS reloftype, NULL AS typname,
-		typ.typrelid AS typoid, rel.relrowsecurity as rlspolicy, rel.relforcerowsecurity as forcerlspolicy,
+		typ.typrelid AS typoid,
 		(CASE WHEN rel.reltoastrelid = 0 THEN false ELSE true END) AS hastoasttable,
+			-- Added for pgAdmin4
+		(CASE WHEN array_length(rel.reloptions, 1) > 0 THEN true ELSE false END) AS autovacuum_custom,
+		(CASE WHEN array_length(tst.reloptions, 1) > 0 AND rel.reltoastrelid != 0 THEN true ELSE false END) AS toast_autovacuum,
+
 		ARRAY[]::varchar[] AS seclabels,
-		(CASE WHEN rel.oid <= {{ datlastsysoid}}::oid THEN true ElSE false END) AS is_sys_table
+		(CASE WHEN rel.oid <= {{ datlastsysoid}}::oid THEN true ElSE false END) AS is_sys_table,
+
+		gdp.distkey::int2[] AS distribution,
+    (CASE WHEN (SELECT count(*) from pg_partition where parrelid = rel.oid) > 0 OR 
+        (select count(*) FROM pg_partition_rule r join pg_partition_rule pr on pr.parparentrule=r.oid where r.parchildrelid=rel.oid) > 0 THEN true ELSE false END) AS is_partitioned
+
 
 	FROM pg_class rel
 		LEFT OUTER JOIN pg_tablespace spc on spc.oid=rel.reltablespace
 		LEFT OUTER JOIN pg_description des ON (des.objoid=rel.oid AND des.objsubid=0 AND des.classoid='pg_class'::regclass)
 		LEFT OUTER JOIN pg_constraint con ON con.conrelid=rel.oid AND con.contype='p'
 		LEFT OUTER JOIN pg_class tst ON tst.oid = rel.reltoastrelid
+		LEFT OUTER JOIN gp_distribution_policy gdp ON gdp.localoid = rel.oid
 		LEFT JOIN pg_type typ ON rel.reltype=typ.oid
 	 WHERE rel.relkind IN ('r','s','t') AND rel.relnamespace = {{ scid }}
 	{% if tid %}  AND rel.oid = {{ tid }}::oid {% endif %}

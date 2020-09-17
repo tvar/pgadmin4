@@ -1462,9 +1462,10 @@ class BaseTableView(PGChildNodeView, BasePartitionTable):
         # Fetch partition of this table if it is partitioned table.
         if 'is_partitioned' in data and data['is_partitioned']:
             # get the partition type
+            part_type = 'sub_partition_scheme' if 'sub_partition_scheme' in data \
+                else 'partition_scheme'
             data['partition_type'] = \
-                data['partition_scheme'].split()[0].lower()
-
+                data[part_type].split()[0].split('(')[0].lower()
             partitions = []
             sql = render_template("/".join([self.partition_template_path,
                                             self._NODES_SQL]),

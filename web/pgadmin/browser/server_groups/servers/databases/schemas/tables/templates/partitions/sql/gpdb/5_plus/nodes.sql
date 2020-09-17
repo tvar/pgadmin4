@@ -1,39 +1,26 @@
 SELECT
-  table_class.oid,
-  partitions.partitiontablename                                                   AS name,
-  (SELECT count(*)
-   FROM pg_trigger
-   WHERE tgrelid = table_class.oid AND tgisconstraint = FALSE)                     AS triggercount,
-  (SELECT count(*)
-   FROM pg_trigger
-   WHERE tgrelid = table_class.oid AND tgisconstraint = FALSE AND tgenabled = 'O') AS has_enable_triggers,
-  partitions.partitionboundary                                                    AS partition_value,
-  partitions.partitionschemaname                                                  AS schema_id,
-  schema_name,
-  CASE WHEN sub_partitions.n > 0
-    THEN TRUE
-  ELSE FALSE END                                                                     is_partitioned,
-  ''                                                                              AS partition_scheme
-FROM
-  (SELECT
-     table_class.relnamespace,
-     nsp.nspname AS schema_name,
-     partitions.partitiontablename,
-     partitions.partitionboundary,
-     partitions.partitionschemaname
-   FROM pg_class table_class
-     INNER JOIN pg_partitions partitions
-       ON (relname = tablename AND parentpartitiontablename IS NULL) OR relname = parentpartitiontablename
-     LEFT JOIN pg_namespace nsp ON table_class.relnamespace = nsp.oid
-   WHERE
-    {% if ptid %} table_class.oid = {{ ptid }}::OID {% endif %}
-    {% if not ptid %} table_class.oid = {{ tid }}::OID {% endif %}
-  ) AS partitions
-  LEFT JOIN (SELECT
-               parentpartitiontablename,
-               count(*) AS n
-             FROM pg_partitions
-             GROUP BY parentpartitiontablename) sub_partitions
-    ON partitions.partitiontablename = sub_partitions.parentpartitiontablename
-  LEFT JOIN pg_class table_class ON partitions.relnamespace = table_class.relnamespace AND partitions.partitiontablename = table_class.relname
-ORDER BY partitions.partitiontablename;
+  c.oid,
+  c.relname  AS name,
+  (SELECT count(*) FROM pg_trigger WHERE tgrelid = c.oid AND tgisconstraint = FALSE) AS triggercount,
+  (SELECT count(*) FROM pg_trigger WHERE tgrelid = c.oid AND tgisconstraint = FALSE AND tgenabled = 'O') AS has_enable_triggers,
+  regexp_replace(replace(replace(replace(
+    pg_get_partition_rule_def(r.oid, true), 
+      'START (', 'FOR VALUES FROM ('),
+      ') END', ') TO'),
+      'VALUES(', 'FOR VALUES IN ('), '(.*) WITH .*', '\1')
+    AS partition_value,
+  n.oid AS schema_id,
+  np.nspname as schema_name,
+  parlevel > max(parlevel) OVER(PARTITION BY cp.oid)  AS is_partitioned,
+  CASE p.parkind WHEN 'r' THEN 'range' WHEN 'l' THEN 'list' ELSE '' END AS partition_scheme
+FROM pg_partition_rule r
+      join pg_partition p on r.paroid=p.oid
+      join pg_class cp on cp.oid=p.parrelid
+      join pg_class c on c.oid=r.parchildrelid  
+      join pg_namespace np on np.oid=cp.relnamespace
+      join pg_namespace n on n.oid=c.relnamespace
+  WHERE
+    {% if ptid %} cp.oid = {{ ptid }}::OID {% endif %}
+    {% if not ptid %} cp.oid = {{ tid }}::OID {% endif %}
+ORDER BY c.relname;
+

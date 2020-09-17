@@ -8,6 +8,7 @@
 {#===========================================#}
 {#====== MAIN TABLE TEMPLATE STARTS HERE ======#}
 {#===========================================#}
+{% if data.columns and data.columns|length > 0 %}
 {#
  If user has not provided any details but only name then
  add empty bracket with table name
@@ -39,7 +40,7 @@ CREATE {% if data.relpersistence %}UNLOGGED {% endif %}TABLE {{conn|qtIdent(data
 
 {% endif %}
 {### Add columns ###}
-{% if data.columns and data.columns|length > 0 %}
+
 {% for c in data.columns %}
 {% if c.name and c.cltype %}
     {% if c.inheritedfromtable %}-- Inherited from table {{c.inheritedfromtable}}: {% endif %}{{conn|qtIdent(c.name)}} {% if is_sql %}{{c.displaytypname}}{% else %}{{ GET_TYPE.CREATE_TYPE_SQL(conn, c.cltype, c.attlen, c.attprecision, c.hasSqrBracket) }}{% endif %}{% if c.collspcname %} COLLATE {{c.collspcname}}{% endif %}{% if c.attnotnull %} NOT NULL{% endif %}{% if c.defval is defined and c.defval is not none and c.defval != '' %} DEFAULT {{c.defval}}{% endif %}
@@ -47,7 +48,7 @@ CREATE {% if data.relpersistence %}UNLOGGED {% endif %}TABLE {{conn|qtIdent(data
 {% endif %}
 {% endif %}
 {% endfor %}
-{% endif %}
+
 {# Macro to render for constraints #}
 {% if data.primary_key|length > 0 %}{% if data.columns|length > 0 %},{% endif %}
 {{CONSTRAINTS.PRIMARY_KEY(conn, data.primary_key[0])}}{% endif %}{% if data.unique_constraint|length > 0 %}{% if data.columns|length > 0 or data.primary_key|length > 0 %},{% endif %}
@@ -170,3 +171,4 @@ ALTER TABLE {{conn|qtIdent(data.schema, data.name)}}
 {{CONSTRAINTS.CONSTRAINT_COMMENTS(conn, data.schema, data.name, data.foreign_key)}}
 {{CONSTRAINTS.CONSTRAINT_COMMENTS(conn, data.schema, data.name, data.check_constraint)}}
 {{CONSTRAINTS.CONSTRAINT_COMMENTS(conn, data.schema, data.name, data.exclude_constraint)}}
+{% endif %}
