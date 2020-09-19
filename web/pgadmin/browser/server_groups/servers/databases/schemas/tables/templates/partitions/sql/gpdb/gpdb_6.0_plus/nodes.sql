@@ -1,6 +1,6 @@
-SELECT
+SELECT DISTINCT ON (cp.relname, cp.oid)
   cp.oid,
-  cp.relname AS name,
+  /*cp.relname*/ r.parname AS name,
   (SELECT count(*) FROM pg_trigger WHERE tgrelid = cp.oid AND tgisinternal = FALSE) AS triggercount,
   (SELECT count(*) FROM pg_trigger WHERE tgrelid = cp.oid AND tgisinternal = FALSE AND tgenabled = 'O') AS has_enable_triggers,
   regexp_replace(replace(replace(replace(
@@ -54,5 +54,5 @@ FROM pg_partition_rule r
   WHERE
     {% if ptid %} cp.oid = {{ ptid }}::OID {% endif %}
     {% if not ptid %} (c.oid = {{ tid }}::OID AND pr.oid is null) OR pr.parchildrelid={{ tid }}::OID {% endif %}
-ORDER BY cp.relname;
+ORDER BY cp.relname, cp.oid;
 

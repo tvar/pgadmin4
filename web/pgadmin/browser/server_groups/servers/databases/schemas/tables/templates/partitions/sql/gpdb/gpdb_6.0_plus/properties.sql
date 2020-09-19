@@ -1,4 +1,18 @@
-SELECT rel.oid, pr.parname AS name, rel.reltablespace AS spcoid,rel.relacl AS relacl_str,
+WITH child_info as (
+SELECT DISTINCT 
+  pr.parchildrelid as ptid,
+  CASE chp.parkind WHEN 'r' THEN 'range' WHEN 'l' THEN 'list' ELSE '' END AS sub_partition_scheme,
+  chp.oid is not null  AS is_sub_partitioned
+FROM pg_partition_rule pr 
+  LEFT JOIN pg_partition p on p.oid=pr.paroid
+  LEFT JOIN pg_partition_rule cr on cr.parparentrule=pr.oid
+  LEFT join pg_partition chp on cr.paroid=chp.oid
+WHERE
+  {% if ptid %} pr.parchildrelid = {{ ptid }}::oid
+  {% else %} p.parrelid = {{tid}} 
+  {% endif %}
+)
+SELECT rel.oid, rel.relname AS name, rel.reltablespace AS spcoid,rel.relacl AS relacl_str,
   (CASE WHEN length(spc.spcname) > 0 THEN spc.spcname ELSE
     (SELECT sp.spcname FROM pg_database dtb
     JOIN pg_tablespace sp ON dtb.dattablespace=sp.oid
@@ -55,8 +69,8 @@ SELECT rel.oid, pr.parname AS name, rel.reltablespace AS spcoid,rel.relacl AS re
     NULL AS seclabels,
     (CASE WHEN rel.oid <= {{datlastsysoid}}::oid THEN true ElSE false END) AS is_sys_table,
     -- Added for partition table
-    (exists (select 1 from pg_partition_rule cr where cr.parparentrule = pr.oid)) as is_partitioned,
-    CASE p.parkind WHEN 'r' THEN 'range' WHEN 'l' THEN 'list' ELSE '' END AS partition_scheme,
+    child_info.is_sub_partitioned as is_partitioned,
+    child_info.sub_partition_scheme AS partition_scheme,
     --pg_get_partition_rule_def(pr.oid, true) AS partition_scheme,
 {% if ptid %}
   regexp_replace(replace(replace(replace(
@@ -73,8 +87,8 @@ SELECT rel.oid, pr.parname AS name, rel.reltablespace AS spcoid,rel.relacl AS re
       'VALUES(', 'FOR VALUES IN ('), '(.*) WITH .*', '\1')
     AS partition_value
 {% endif %}
-  ,chp.oid is not null  AS is_sub_partitioned
-  ,CASE chp.parkind WHEN 'r' THEN 'range' WHEN 'l' THEN 'list' ELSE '' END AS sub_partition_scheme
+/*  ,child_info.is_sub_partitioned
+  ,child_info.sub_partition_scheme*/
 FROM pg_class rel
   LEFT JOIN pg_partition_rule pr on pr.parchildrelid = rel.oid
   LEFT JOIN pg_partition p on p.oid=pr.paroid
@@ -84,9 +98,7 @@ FROM pg_class rel
   LEFT OUTER JOIN pg_class tst ON tst.oid = rel.reltoastrelid
   LEFT JOIN pg_type typ ON rel.reltype=typ.oid
   LEFT JOIN pg_namespace nsp ON rel.relnamespace = nsp.oid
-    LEFT JOIN pg_partition_rule cr on cr.parparentrule=pr.oid
-    LEFT join pg_partition chp on cr.paroid=chp.oid
-
+  LEFT JOIN child_info on child_info.ptid=rel.oid 
 WHERE 
   {% if ptid %}  rel.oid = {{ ptid }}::oid
   {% else %} p.parrelid = {{tid}} 
