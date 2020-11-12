@@ -1,3 +1,5 @@
+SET LOCAL join_collapse_limit=8;
+SET LOCAL enable_nestloop=on;
 SELECT DISTINCT dep.deptype, dep.classid, cl.relkind, ad.adbin, ad.adsrc,
     CASE WHEN cl.relkind IS NOT NULL THEN CASE WHEN cl.relkind = 'r' THEN cl.relkind || COALESCE(dep.objsubid::text, '') ELSE cl.relkind END
         WHEN tg.oid IS NOT NULL THEN 'Tr'::text
