@@ -1,3 +1,7 @@
+with rel as (select rel.oid, rel.* from pg_class rel
+	    {% if not tid %} left join pg_partition_rule r on r.parchildrelid=rel.oid {% endif %}
+	     where  rel.relkind IN ('r','s','t') and rel.relnamespace = {{ scid }}
+	    {% if tid %}  AND rel.oid = {{ tid }}::oid {% else %} AND r.parchildrelid is null {% endif %})
 SELECT *,
 	(CASE when pre_coll_inherits is NULL then ARRAY[]::varchar[] else pre_coll_inherits END) as coll_inherits
   {% if tid %}, (CASE WHEN is_partitioned THEN (SELECT substring(pg_get_partition_def({{ tid }}::oid, true) from 14)) ELSE '' END) AS partition_scheme {% endif %}
@@ -74,14 +78,12 @@ FROM (
         (select count(*) FROM pg_partition_rule r join pg_partition_rule pr on pr.parparentrule=r.oid where r.parchildrelid=rel.oid) > 0 THEN true ELSE false END) AS is_partitioned
 
 
-	FROM pg_class rel
+	FROM rel
 		LEFT OUTER JOIN pg_tablespace spc on spc.oid=rel.reltablespace
 		LEFT OUTER JOIN pg_description des ON (des.objoid=rel.oid AND des.objsubid=0 AND des.classoid='pg_class'::regclass)
 		LEFT OUTER JOIN pg_constraint con ON con.conrelid=rel.oid AND con.contype='p'
 		LEFT OUTER JOIN pg_class tst ON tst.oid = rel.reltoastrelid
 		LEFT OUTER JOIN gp_distribution_policy gdp ON gdp.localoid = rel.oid
 		LEFT JOIN pg_type typ ON rel.reltype=typ.oid
-	 WHERE rel.relkind IN ('r','s','t') AND rel.relnamespace = {{ scid }}
-	{% if tid %}  AND rel.oid = {{ tid }}::oid {% endif %}
 ) AS TableInformation
  ORDER BY name
